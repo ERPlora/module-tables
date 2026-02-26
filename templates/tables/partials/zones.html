@@ -1,0 +1,59 @@
+{% load djicons i18n djicons djicons %}
+
+<div class="p-4">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">{% trans "Zones" %}</h3>
+        <a hx-get="{% url 'tables:zone_add' %}"
+           hx-target="#main-content-area"
+           hx-push-url="true"
+           class="btn btn-sm color-primary">
+            {% icon "add-outline" %} {% trans "Add Zone" %}
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="list">
+            {% for zone in zones %}
+            <a hx-get="{% url 'tables:zone_edit' zone.id %}"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                         style="background: var(--color-{{ zone.color }}, var(--color-primary))20; color: var(--color-{{ zone.color }}, var(--color-primary))">
+                        {% icon "layers-outline" css_class="text-xl" %}
+                    </div>
+                </div>
+                <div class="list-item-content">
+                    <div class="list-item-label">
+                        {{ zone.name }}
+                        {% if not zone.is_active %}
+                        <span class="badge badge-sm ml-2">{% trans "Inactive" %}</span>
+                        {% endif %}
+                    </div>
+                    <div class="list-item-note">
+                        {{ zone.table_count }} {% trans "tables" %}
+                        {% if zone.description %} &middot; {{ zone.description|truncatewords:8 }}{% endif %}
+                    </div>
+                </div>
+                <div class="list-item-end flex items-center gap-2">
+                    <span class="text-xs text-muted">{% trans "Order" %}: {{ zone.sort_order }}</span>
+                    {% icon "chevron-forward-outline" css_class="text-muted" %}
+                </div>
+            </a>
+            {% empty %}
+            <div class="p-8 text-center">
+                {% icon "layers-outline" css_class="text-4xl text-muted mb-2" %}
+                <p class="text-muted mb-3">{% trans "No zones created yet" %}</p>
+                <p class="text-sm text-muted mb-4">{% trans "Zones help organize your tables by area (e.g., Main Hall, Terrace, VIP)." %}</p>
+                <a hx-get="{% url 'tables:zone_add' %}"
+                   hx-target="#main-content-area"
+                   hx-push-url="true"
+                   class="btn color-primary">
+                    {% icon "add-outline" %} {% trans "Create First Zone" %}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

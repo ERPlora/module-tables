@@ -1,0 +1,139 @@
+{% load djicons i18n djicons djicons %}
+
+<div class="p-4">
+    <button type="button"
+            hx-get="{% if is_new %}{% url 'tables:tables_list' %}{% else %}{% url 'tables:table_detail' table.id %}{% endif %}"
+            hx-target="#main-content-area"
+            hx-push-url="true"
+            class="btn btn-ghost mb-3">
+        {% icon "arrow-back-outline" %}
+        {% if is_new %}{% trans "Back to Tables" %}{% else %}{% trans "Back to Table" %}{% endif %}
+    </button>
+
+    <form method="post"
+          hx-post=""
+          hx-target="#main-content-area">
+        {% csrf_token %}
+
+        <!-- Basic Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">{% if is_new %}{% trans "New Table" %}{% else %}{% trans "Edit Table" %} &mdash; {{ table.display_name }}{% endif %}</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-group-label mb-1">{% trans "Table Number" %} *</label>
+                        {{ form.number }}
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{% trans "Name" %}</label>
+                        {{ form.name }}
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{% trans "Zone" %}</label>
+                        {{ form.zone }}
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{% trans "Capacity" %} *</label>
+                        {{ form.capacity }}
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{% trans "Shape" %}</label>
+                        {{ form.shape }}
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{% trans "Status" %}</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="toggle">
+                            {{ form.is_active }}
+                            
+                        </label>
+                        <span>{% trans "Active" %}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floor Plan Position -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">{% icon "map-outline" css_class="text-primary" %} {% trans "Floor Plan Position" %}</h3>
+                <p class="text-sm opacity-60">{% trans "Position and size on the floor plan (0-100 scale)." %}</p>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="form-group-label mb-1">{% trans "Position X" %}</label>
+                        {{ form.position_x }}
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{% trans "Position Y" %}</label>
+                        {{ form.position_y }}
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{% trans "Width" %}</label>
+                        {{ form.width }}
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{% trans "Height" %}</label>
+                        {{ form.height }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if form.errors %}
+        <div class="card mb-4" style="border-color: var(--color-error)">
+            <div class="card-body">
+                {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                <p class="text-error text-sm">{{ field }}: {{ error }}</p>
+                {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-lg btn-block color-primary">
+            {% if is_new %}
+            {% icon "add-outline" %} {% trans "Create Table" %}
+            {% else %}
+            {% icon "checkmark-outline" %} {% trans "Save Changes" %}
+            {% endif %}
+        </button>
+    </form>
+
+    {% if not is_new %}
+    <!-- Danger Zone -->
+    <div class="card mt-6" style="border-color: var(--color-error)">
+        <div class="card-header">
+            <h3 class="card-title text-error">{% trans "Danger Zone" %}</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">{% trans "Permanently delete this table and all associated sessions." %}</p>
+            <button type="button" class="btn btn-outline color-error"
+                    onclick="deleteTable()">
+                {% icon "trash-outline" %} {% trans "Delete Table" %}
+            </button>
+        </div>
+    </div>
+
+    <script>
+    function deleteTable() {
+        if (confirm('{% trans "Delete this table? All associated sessions will be lost." %}')) {
+            fetch('{% url "tables:table_delete" table.id %}', {
+                method: 'POST',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    htmx.ajax('GET', '{% url "tables:tables_list" %}', '#main-content-area');
+                }
+            });
+        }
+    }
+    </script>
+    {% endif %}
+</div>

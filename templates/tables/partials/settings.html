@@ -1,0 +1,137 @@
+{% load djicons i18n djicons djicons %}
+
+<div class="p-4">
+    <!-- Overview Stats -->
+    <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="card">
+            <div class="card-body flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    {% icon "grid-outline" css_class="text-xl text-primary" %}
+                </div>
+                <div>
+                    <div class="text-2xl font-bold">{{ total_tables }}</div>
+                    <div class="text-xs text-muted">{% trans "Total Tables" %}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                    {% icon "checkmark-circle-outline" css_class="text-xl text-success" %}
+                </div>
+                <div>
+                    <div class="text-2xl font-bold">{{ active_tables }}</div>
+                    <div class="text-xs text-muted">{% trans "Active Tables" %}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+                    {% icon "time-outline" css_class="text-xl text-warning" %}
+                </div>
+                <div>
+                    <div class="text-2xl font-bold">{{ active_sessions }}</div>
+                    <div class="text-xs text-muted">{% trans "Active Sessions" %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zones Management -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title">{% icon "layers-outline" css_class="text-primary" %} {% trans "Zones" %}</h3>
+        </div>
+        <div class="list">
+            {% for zone in zones %}
+            <a hx-get="{% url 'tables:zone_edit' zone.id %}"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                         style="background: var(--color-{{ zone.color }}, var(--color-primary))20; color: var(--color-{{ zone.color }}, var(--color-primary))">
+                        {% icon "layers-outline" css_class="text-lg" %}
+                    </div>
+                </div>
+                <div class="list-item-content">
+                    <div class="list-item-label">
+                        {{ zone.name }}
+                        {% if not zone.is_active %}
+                        <span class="badge badge-sm ml-1">{% trans "Inactive" %}</span>
+                        {% endif %}
+                    </div>
+                    <div class="list-item-note">{{ zone.table_count }} {% trans "tables" %}</div>
+                </div>
+                <div class="list-item-end">{% icon "chevron-forward-outline" css_class="text-muted" %}</div>
+            </a>
+            {% empty %}
+            <div class="p-6 text-center text-muted text-sm">
+                {% trans "No zones created" %}
+            </div>
+            {% endfor %}
+        </div>
+        <div class="card-body pt-0">
+            <a hx-get="{% url 'tables:zone_add' %}"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="btn btn-sm btn-outline btn-block color-primary">
+                {% icon "add-outline" %} {% trans "Add Zone" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title">{% icon "link-outline" %} {% trans "Quick Actions" %}</h3>
+        </div>
+        <div class="list">
+            <a hx-get="{% url 'tables:floor_plan' %}"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">{% icon "map-outline" css_class="text-primary" %}</div>
+                <div class="list-item-content">
+                    <div class="list-item-label">{% trans "Floor Plan" %}</div>
+                    <div class="list-item-note">{% trans "Visual table layout and positioning" %}</div>
+                </div>
+                <div class="list-item-end">{% icon "chevron-forward-outline" css_class="text-muted" %}</div>
+            </a>
+            <a hx-get="{% url 'tables:tables_list' %}"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">{% icon "grid-outline" css_class="text-success" %}</div>
+                <div class="list-item-content">
+                    <div class="list-item-label">{% trans "Manage Tables" %}</div>
+                    <div class="list-item-note">{{ total_tables }} {% trans "tables configured" %}</div>
+                </div>
+                <div class="list-item-end">{% icon "chevron-forward-outline" css_class="text-muted" %}</div>
+            </a>
+            <a hx-get="{% url 'tables:sessions' %}"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">{% icon "time-outline" css_class="text-warning" %}</div>
+                <div class="list-item-content">
+                    <div class="list-item-label">{% trans "Active Sessions" %}</div>
+                    <div class="list-item-note">{{ active_sessions }} {% trans "tables currently in use" %}</div>
+                </div>
+                <div class="list-item-end">{% icon "chevron-forward-outline" css_class="text-muted" %}</div>
+            </a>
+            <a hx-get="{% url 'tables:table_add' %}"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">{% icon "add-circle-outline" css_class="text-primary" %}</div>
+                <div class="list-item-content">
+                    <div class="list-item-label">{% trans "Add New Table" %}</div>
+                    <div class="list-item-note">{% trans "Create a new table for your restaurant" %}</div>
+                </div>
+                <div class="list-item-end">{% icon "chevron-forward-outline" css_class="text-muted" %}</div>
+            </a>
+        </div>
+    </div>
+</div>

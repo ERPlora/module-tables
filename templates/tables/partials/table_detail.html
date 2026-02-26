@@ -1,0 +1,279 @@
+{% load djicons i18n djicons djicons %}
+
+<div class="p-4">
+    <button type="button"
+            hx-get="{% url 'tables:floor_plan' %}"
+            hx-target="#main-content-area"
+            hx-push-url="true"
+            class="btn btn-ghost mb-3">
+        {% icon "arrow-back-outline" %}
+        {% trans "Back to Floor Plan" %}
+    </button>
+
+    <!-- Table header card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="flex items-start justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold"
+                         style="background: {% if table.status == 'available' %}var(--color-success-tint, rgba(52,199,89,0.15)){% elif table.status == 'occupied' %}var(--color-warning-tint, rgba(255,149,0,0.15)){% elif table.status == 'reserved' %}var(--color-primary-tint, rgba(0,122,255,0.15)){% else %}var(--color-error-tint, rgba(255,59,48,0.15)){% endif %}; color: {% if table.status == 'available' %}var(--color-success){% elif table.status == 'occupied' %}var(--color-warning){% elif table.status == 'reserved' %}var(--color-primary){% else %}var(--color-error){% endif %};">
+                        {{ table.number }}
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">{{ table.display_name }}</h2>
+                        <div class="text-sm text-muted">
+                            {% if table.zone %}{{ table.zone.name }} &middot; {% endif %}
+                            {% icon "people-outline" css_class="text-xs" %} {{ table.capacity }} {% trans "seats" %}
+                            &middot; {{ table.get_shape_display }}
+                        </div>
+                        <span class="badge color-{% if table.status == 'available' %}success{% elif table.status == 'occupied' %}warning{% elif table.status == 'reserved' %}primary{% else %}error{% endif %} mt-1">
+                            {{ table.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <a hx-get="{% url 'tables:table_edit' table.id %}"
+                   hx-target="#main-content-area"
+                   hx-push-url="true"
+                   class="btn btn-sm btn-outline">
+                    {% icon "create-outline" %} {% trans "Edit" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick status change -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title">{% icon "swap-horizontal-outline" css_class="text-primary" %} {% trans "Quick Status" %}</h3>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <button type="button"
+                        class="btn btn-sm {% if table.status == 'available' %}color-success{% else %}btn-outline{% endif %}"
+                        onclick="updateTableStatus('available')"
+                        {% if table.status == 'available' %}disabled{% endif %}>
+                    {% icon "checkmark-circle-outline" %} {% trans "Available" %}
+                </button>
+                <button type="button"
+                        class="btn btn-sm {% if table.status == 'occupied' %}color-warning{% else %}btn-outline{% endif %}"
+                        onclick="updateTableStatus('occupied')"
+                        {% if table.status == 'occupied' %}disabled{% endif %}>
+                    {% icon "people-outline" %} {% trans "Occupied" %}
+                </button>
+                <button type="button"
+                        class="btn btn-sm {% if table.status == 'reserved' %}color-primary{% else %}btn-outline{% endif %}"
+                        onclick="updateTableStatus('reserved')"
+                        {% if table.status == 'reserved' %}disabled{% endif %}>
+                    {% icon "calendar-outline" %} {% trans "Reserved" %}
+                </button>
+                <button type="button"
+                        class="btn btn-sm {% if table.status == 'blocked' %}color-error{% else %}btn-outline{% endif %}"
+                        onclick="updateTableStatus('blocked')"
+                        {% if table.status == 'blocked' %}disabled{% endif %}>
+                    {% icon "close-circle-outline" %} {% trans "Blocked" %}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Session -->
+    {% if current_session %}
+    <div class="card mb-4" style="border-color: var(--color-warning)">
+        <div class="card-header">
+            <h3 class="card-title">{% icon "time-outline" css_class="text-warning" %} {% trans "Current Session" %}</h3>
+        </div>
+        <div class="list">
+            <div class="list-item">
+                <div class="list-item-content">
+                    <div class="list-item-label">{% trans "Guests" %}</div>
+                </div>
+                <div class="list-item-end font-semibold">{{ current_session.guests_count }}</div>
+            </div>
+            <div class="list-item">
+                <div class="list-item-content">
+                    <div class="list-item-label">{% trans "Opened" %}</div>
+                </div>
+                <div class="list-item-end text-sm">{{ current_session.opened_at|date:"H:i" }}</div>
+            </div>
+            <div class="list-item">
+                <div class="list-item-content">
+                    <div class="list-item-label">{% trans "Duration" %}</div>
+                </div>
+                <div class="list-item-end font-semibold">{{ current_session.duration_minutes }} {% trans "min" %}</div>
+            </div>
+            {% if current_session.waiter %}
+            <div class="list-item">
+                <div class="list-item-content">
+                    <div class="list-item-label">{% trans "Waiter" %}</div>
+                </div>
+                <div class="list-item-end text-sm">{{ current_session.waiter.name }}</div>
+            </div>
+            {% endif %}
+            {% if current_session.notes %}
+            <div class="list-item">
+                <div class="list-item-content">
+                    <div class="list-item-label">{% trans "Notes" %}</div>
+                    <div class="list-item-note">{{ current_session.notes }}</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-body pt-0">
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" class="btn btn-outline color-error"
+                        onclick="closeSession()">
+                    {% icon "close-outline" %} {% trans "Close Table" %}
+                </button>
+                <button type="button" class="btn btn-outline color-primary"
+                        onclick="document.getElementById('transfer-panel').style.display = document.getElementById('transfer-panel').style.display === 'none' ? 'block' : 'none'">
+                    {% icon "swap-horizontal-outline" %} {% trans "Transfer" %}
+                </button>
+            </div>
+
+            <!-- Transfer panel (hidden by default) -->
+            <div id="transfer-panel" class="mt-3" style="display: none;">
+                <label class="form-group-label mb-1">{% trans "Transfer to table:" %}</label>
+                <select id="transfer-target" class="select mb-2">
+                    <option value="">{% trans "Select a table..." %}</option>
+                    {% for t in available_tables %}
+                    <option value="{{ t.id }}">{{ t.display_name }}{% if t.zone %} ({{ t.zone.name }}){% endif %}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn btn-block color-primary btn-sm"
+                        onclick="transferSession()">
+                    {% icon "checkmark-outline" %} {% trans "Confirm Transfer" %}
+                </button>
+            </div>
+        </div>
+    </div>
+    {% elif table.status == 'available' %}
+    <!-- Open new session -->
+    <div class="card mb-4" style="border-color: var(--color-success)">
+        <div class="card-header">
+            <h3 class="card-title">{% icon "add-circle-outline" css_class="text-success" %} {% trans "Open Table" %}</h3>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="form-group-label mb-1">{% trans "Number of Guests" %}</label>
+                    <input type="number" id="open-guests" class="input" value="1" min="1" max="{{ table.capacity }}">
+                </div>
+                <div>
+                    <label class="form-group-label mb-1">{% trans "Notes" %}</label>
+                    <input type="text" id="open-notes" class="input" placeholder="{% trans 'Optional notes...' %}">
+                </div>
+            </div>
+            <button type="button" class="btn btn-block color-success"
+                    onclick="openSession()">
+                {% icon "enter-outline" %} {% trans "Open Table" %}
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Sessions -->
+    {% if recent_sessions %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title">{% icon "time-outline" %} {% trans "Recent Sessions" %}</h3>
+        </div>
+        <div class="list">
+            {% for session in recent_sessions %}
+            <div class="list-item">
+                <div class="list-item-start">
+                    <span class="badge badge-sm color-{% if session.status == 'closed' %}medium{% elif session.status == 'transferred' %}primary{% else %}warning{% endif %}">
+                        {{ session.get_status_display }}
+                    </span>
+                </div>
+                <div class="list-item-content">
+                    <div class="list-item-label">
+                        {{ session.opened_at|date:"M d, H:i" }}
+                        {% if session.closed_at %} &rarr; {{ session.closed_at|date:"H:i" }}{% endif %}
+                    </div>
+                    <div class="list-item-note">
+                        {% icon "people-outline" css_class="text-xs" %} {{ session.guests_count }} {% trans "guests" %}
+                        &middot; {{ session.duration_minutes }} {% trans "min" %}
+                        {% if session.waiter %} &middot; {{ session.waiter.name }}{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function updateTableStatus(status) {
+    fetch('{% url "tables:table_update_status" table.id %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'status=' + status,
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            htmx.ajax('GET', '{% url "tables:table_detail" table.id %}', '#main-content-area');
+        }
+    });
+}
+
+{% if current_session %}
+function closeSession() {
+    if (confirm('{% trans "Close this table session?" %}')) {
+        fetch('{% url "tables:session_close" current_session.id %}', {
+            method: 'POST',
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                htmx.ajax('GET', '{% url "tables:table_detail" table.id %}', '#main-content-area');
+            }
+        });
+    }
+}
+
+function transferSession() {
+    const targetId = document.getElementById('transfer-target').value;
+    if (!targetId) {
+        alert('{% trans "Please select a target table." %}');
+        return;
+    }
+    if (confirm('{% trans "Transfer this session to the selected table?" %}')) {
+        fetch('{% url "tables:session_transfer" current_session.id %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'target_table_id=' + targetId,
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                htmx.ajax('GET', '{% url "tables:table_detail" table.id %}', '#main-content-area');
+            }
+        });
+    }
+}
+{% endif %}
+
+{% if table.status == 'available' and not current_session %}
+function openSession() {
+    const guests = document.getElementById('open-guests').value;
+    const notes = document.getElementById('open-notes').value;
+    fetch('{% url "tables:session_open" table.id %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'guests_count=' + encodeURIComponent(guests) + '&notes=' + encodeURIComponent(notes),
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            htmx.ajax('GET', '{% url "tables:table_detail" table.id %}', '#main-content-area');
+        } else {
+            alert(data.message || '{% trans "Error opening table" %}');
+        }
+    });
+}
+{% endif %}
+</script>
