@@ -13,7 +13,8 @@ from django.utils import timezone
 from django.db.models import Q, Count
 
 from apps.core.htmx import htmx_view
-from apps.accounts.decorators import login_required
+from apps.accounts.decorators import login_required, permission_required
+from apps.modules_runtime.navigation import with_module_nav
 
 from .models import Zone, Table, TableSession
 from .forms import ZoneForm, TableForm
@@ -28,12 +29,14 @@ def _hub_id(request):
 # =============================================================================
 
 @login_required
+@with_module_nav('tables', 'floor_plan')
 @htmx_view('tables/pages/index.html', 'tables/partials/floor_plan.html')
 def index(request):
     return floor_plan(request)
 
 
 @login_required
+@with_module_nav('tables', 'floor_plan')
 @htmx_view('tables/pages/index.html', 'tables/partials/floor_plan.html')
 def floor_plan(request):
     hub = _hub_id(request)
@@ -90,6 +93,7 @@ def floor_plan(request):
 # =============================================================================
 
 @login_required
+@with_module_nav('tables', 'zones')
 @htmx_view('tables/pages/index.html', 'tables/partials/zones.html')
 def zones(request):
     hub = _hub_id(request)
@@ -103,6 +107,7 @@ def zones(request):
 
 
 @login_required
+@with_module_nav('tables', 'zones')
 @htmx_view('tables/pages/index.html', 'tables/partials/zone_form.html')
 def zone_add(request):
     hub = _hub_id(request)
@@ -124,6 +129,7 @@ def zone_add(request):
 
 
 @login_required
+@with_module_nav('tables', 'zones')
 @htmx_view('tables/pages/index.html', 'tables/partials/zone_form.html')
 def zone_edit(request, zone_id):
     hub = _hub_id(request)
@@ -159,6 +165,7 @@ def zone_delete(request, zone_id):
 # =============================================================================
 
 @login_required
+@with_module_nav('tables', 'tables')
 @htmx_view('tables/pages/index.html', 'tables/partials/tables_list.html')
 def tables_list(request):
     hub = _hub_id(request)
@@ -194,6 +201,7 @@ def tables_list(request):
 
 
 @login_required
+@with_module_nav('tables', 'tables')
 @htmx_view('tables/pages/index.html', 'tables/partials/table_form.html')
 def table_add(request):
     hub = _hub_id(request)
@@ -221,6 +229,7 @@ def table_add(request):
 
 
 @login_required
+@with_module_nav('tables', 'tables')
 @htmx_view('tables/pages/index.html', 'tables/partials/table_form.html')
 def table_edit(request, table_id):
     hub = _hub_id(request)
@@ -258,6 +267,7 @@ def table_delete(request, table_id):
 
 
 @login_required
+@with_module_nav('tables', 'tables')
 @htmx_view('tables/pages/index.html', 'tables/partials/table_detail.html')
 def table_detail(request, table_id):
     hub = _hub_id(request)
@@ -313,6 +323,7 @@ def table_update_position(request, table_id):
 # =============================================================================
 
 @login_required
+@with_module_nav('tables', 'sessions')
 @htmx_view('tables/pages/index.html', 'tables/partials/sessions.html')
 def sessions(request):
     hub = _hub_id(request)
@@ -402,6 +413,8 @@ def session_transfer(request, session_id):
 # =============================================================================
 
 @login_required
+@permission_required('tables.manage_settings')
+@with_module_nav('tables', 'settings')
 @htmx_view('tables/pages/index.html', 'tables/partials/settings.html')
 def settings(request):
     hub = _hub_id(request)

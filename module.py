@@ -31,4 +31,6 @@ PERMISSIONS = [
     'tables.add_tablesession',
     'tables.change_tablesession',
     'tables.delete_tablesession',
+
+    'tables.manage_settings',
 ]
