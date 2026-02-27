@@ -6,7 +6,7 @@ MODULE_VERSION = '2.0.0'
 
 MENU = {
     'label': _('Tables'),
-    'icon': 'grid-outline',
+    'icon': 'material:table_restaurant',
     'order': 20,
 }
 
