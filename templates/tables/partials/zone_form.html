@@ -1,15 +1,8 @@
-{% load djicons i18n djicons djicons %}
+{% load djicons i18n %}
+
+<div data-back-url="{% url 'tables:zones' %}" hidden></div>
 
 <div class="p-4">
-    <button type="button"
-            hx-get="{% url 'tables:zones' %}"
-            hx-target="#main-content-area"
-            hx-push-url="true"
-            class="btn btn-ghost mb-3">
-        {% icon "arrow-back-outline" %}
-        {% trans "Back to Zones" %}
-    </button>
-
     <form method="post"
           hx-post=""
           hx-target="#main-content-area">
@@ -70,33 +63,48 @@
     </form>
 
     {% if not is_new %}
-    <!-- Danger Zone -->
-    <div class="card mt-6" style="border-color: var(--color-error)">
-        <div class="card-header">
-            <h3 class="card-title text-error">{% trans "Danger Zone" %}</h3>
+    <div x-data="{ showDeleteConfirm: false }">
+        <!-- Danger Zone -->
+        <div class="card mt-6" style="border-color: var(--color-error)">
+            <div class="card-header">
+                <h3 class="card-title text-error">{% trans "Danger Zone" %}</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">{% trans "Permanently delete this zone. Tables in this zone will become unassigned." %}</p>
+                <button type="button" class="btn btn-outline color-error"
+                        @click="showDeleteConfirm = true">
+                    {% icon "trash-outline" %} {% trans "Delete Zone" %}
+                </button>
+            </div>
         </div>
-        <div class="card-body">
-            <p class="text-muted mb-3">{% trans "Permanently delete this zone. Tables in this zone will become unassigned." %}</p>
-            <button type="button" class="btn btn-outline color-error"
-                    onclick="deleteZone()">
-                {% icon "trash-outline" %} {% trans "Delete Zone" %}
-            </button>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal-backdrop" :data-state="showDeleteConfirm ? 'open' : 'closed'" @click.self="showDeleteConfirm = false">
+            <div class="modal modal-sm">
+                <div class="modal-header">
+                    <h3 class="modal-title">{% trans "Delete Zone" %}</h3>
+                    <button class="modal-close" @click="showDeleteConfirm = false">{% icon "close-outline" %}</button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-sm text-base-content/70">{% trans "Delete this zone? Tables in this zone will become unassigned." %}</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost btn-sm" @click="showDeleteConfirm = false">{% trans "Cancel" %}</button>
+                    <button class="btn btn-sm color-error" @click="
+                        showDeleteConfirm = false;
+                        fetch('{% url "tables:zone_delete" zone.id %}', {
+                            method: 'POST',
+                            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                        }).then(r => r.json()).then(data => {
+                            if (data.success) {
+                                htmx.ajax('GET', '{% url "tables:zones" %}', '#main-content-area');
+                            }
+                        })">
+                        {% icon "trash-outline" %} {% trans "Delete" %}
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-
-    <script>
-    function deleteZone() {
-        if (confirm('{% trans "Delete this zone? Tables in this zone will become unassigned." %}')) {
-            fetch('{% url "tables:zone_delete" zone.id %}', {
-                method: 'POST',
-                headers: {'X-CSRFToken': '{{ csrf_token }}'},
-            }).then(r => r.json()).then(data => {
-                if (data.success) {
-                    htmx.ajax('GET', '{% url "tables:zones" %}', '#main-content-area');
-                }
-            });
-        }
-    }
-    </script>
     {% endif %}
 </div>
