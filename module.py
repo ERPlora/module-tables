@@ -34,3 +34,24 @@ PERMISSIONS = [
 
     'tables.manage_settings',
 ]
+
+ROLE_PERMISSIONS = {
+    "admin": ["*"],
+    "manager": [
+        "add_table",
+        "add_tablesession",
+        "add_zone",
+        "change_table",
+        "change_tablesession",
+        "change_zone",
+        "view_table",
+        "view_tablesession",
+        "view_zone",
+    ],
+    "employee": [
+        "add_zone",
+        "view_table",
+        "view_tablesession",
+        "view_zone",
+    ],
+}
