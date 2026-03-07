@@ -14,14 +14,12 @@
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'status=' + status,
-        }).then(r => r.json()).then(data => {
+                'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'status=' + status}).then(r => r.json()).then(data => {
             if (data.success) {
                 htmx.ajax('GET', '{% url "tables:table_detail" table.id %}', '#main-content-area');
             }
-        });
+        },
     },
 
     {% if current_session %}
@@ -29,13 +27,11 @@
         this.showCloseConfirm = false;
         fetch('{% url "tables:session_close" current_session.id %}', {
             method: 'POST',
-            headers: {'X-CSRFToken': '{{ csrf_token }}'},
-        }).then(r => r.json()).then(data => {
+            headers: {'X-CSRFToken': '{{ csrf_token }}'}}).then(r => r.json()).then(data => {
             if (data.success) {
                 htmx.ajax('GET', '{% url "tables:table_detail" table.id %}', '#main-content-area');
             }
-        });
-    },
+        },
 
     transferSession() {
         const targetId = document.getElementById('transfer-target').value;
@@ -49,14 +45,12 @@
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'target_table_id=' + targetId,
-        }).then(r => r.json()).then(data => {
+                'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'target_table_id=' + targetId}).then(r => r.json()).then(data => {
             if (data.success) {
                 htmx.ajax('GET', '{% url "tables:table_detail" table.id %}', '#main-content-area');
             }
-        });
+        },
     },
     {% endif %}
 
@@ -68,17 +62,15 @@
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'guests_count=' + encodeURIComponent(guests) + '&notes=' + encodeURIComponent(notes),
-        }).then(r => r.json()).then(data => {
+                'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'guests_count=' + encodeURIComponent(guests) + '&notes=' + encodeURIComponent(notes)}).then(r => r.json()).then(data => {
             if (data.success) {
                 htmx.ajax('GET', '{% url "tables:table_detail" table.id %}', '#main-content-area');
             } else {
                 this.errorMessage = data.message || '{% trans "Error opening table" %}';
                 this.showError = true;
             }
-        });
+        },
     },
     {% endif %}
 }">

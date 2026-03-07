@@ -94,8 +94,7 @@
                         showDeleteConfirm = false;
                         fetch('{% url "tables:zone_delete" zone.id %}', {
                             method: 'POST',
-                            headers: {'X-CSRFToken': '{{ csrf_token }}'},
-                        }).then(r => r.json()).then(data => {
+                            headers: {'X-CSRFToken': '{{ csrf_token }}'}}).then(r => r.json()).then(data => {
                             if (data.success) {
                                 htmx.ajax('GET', '{% url "tables:zones" %}', '#main-content-area');
                             }

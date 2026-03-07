@@ -80,8 +80,8 @@
                      style="left: {{ table.position_x }}%; top: {{ table.position_y }}%;
                             width: {{ table.width }}%; height: {{ table.height }}%;
                             {% if table.shape == 'round' %}border-radius: 50%;{% elif table.shape == 'rectangle' %}border-radius: 6px;{% else %}border-radius: 6px;{% endif %}
-                            background: {% if table.status == 'available' %}var(--color-success-tint, rgba(52,199,89,0.15)){% elif table.status == 'occupied' %}var(--color-warning-tint, rgba(255,149,0,0.15)){% elif table.status == 'reserved' %}var(--color-primary-tint, rgba(0,122,255,0.15)){% else %}var(--color-error-tint, rgba(255,59,48,0.15)){% endif %};
-                            border: 2px solid {% if table.status == 'available' %}var(--color-success){% elif table.status == 'occupied' %}var(--color-warning){% elif table.status == 'reserved' %}var(--color-primary){% else %}var(--color-error){% endif %};
+                            background: {% if table.status == 'available' %}var(--color-success-tint, rgba(52,199,89,0.15)){% elif table.status == 'occupied' %}var(--color-warning-tint, rgba(255,149,0,0.15)){% elif table.status == 'reserved' %}var(--color-primary-tint, rgba(0,122,255,0.15)){% else %}var(--color-error-tint, rgba(255,59,48,0.15)){% endif %},
+                            border: 2px solid {% if table.status == 'available' %}var(--color-success){% elif table.status == 'occupied' %}var(--color-warning){% elif table.status == 'reserved' %}var(--color-primary){% else %}var(--color-error){% endif %},
                             transform: translate(-50%, -50%);"
                      hx-get="{% url 'tables:table_detail' table.id %}"
                      hx-target="#main-content-area"
@@ -181,8 +181,7 @@
             offsetY = e.clientY - this.getBoundingClientRect().top - this.offsetHeight / 2;
             this.style.zIndex = '10';
             this.style.opacity = '0.8';
-        });
-    });
+        },
 
     document.addEventListener('mousemove', function(e) {
         if (!dragging) return;
@@ -194,7 +193,7 @@
         y = Math.max(0, Math.min(100, y));
         dragging.style.left = x + '%';
         dragging.style.top = y + '%';
-    });
+    },
 
     document.addEventListener('mouseup', function(e) {
         if (!dragging) return;
@@ -214,10 +213,8 @@
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `position_x=${x}&position_y=${y}`,
-        });
+                'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `position_x=${x}&position_y=${y}`},
 
         /* Check if it was a click (no significant movement) - navigate to detail */
         const startLeft = parseFloat(dragging.style.left);
@@ -227,6 +224,6 @@
         }
 
         dragging = null;
-    });
+    },
 })();
 </script>
